@@ -1,3 +1,4 @@
+ifneq ($(TARGET_SEPOLICY_NEW),true)
 LOCAL_PATH:= $(call my-dir)
 
 include $(CLEAR_VARS)
@@ -188,3 +189,4 @@ build_policy :=
 sepolicy_replace_paths :=
 
 include $(call all-makefiles-under,$(LOCAL_PATH))
+endif
