@@ -1,4 +1,4 @@
-ifneq ($(TARGET_SEPOLICY_NEW),true)
+ifeq ($(TARGET_SEPOLICY_NEW),true)
 LOCAL_PATH:= $(call my-dir)
 
 include $(CLEAR_VARS)
@@ -12,9 +12,9 @@ MLS_SENS=1
 MLS_CATS=1024
 
 ifeq ($(TARGET_BUILD_VARIANT),user)
-	BOARD_SEPOLICY_IGNORE+=external/sepolicy/su.te
+	BOARD_SEPOLICY_IGNORE+=external/sepolicy-flo/su.te
 else
-	BOARD_SEPOLICY_IGNORE+=external/sepolicy/su_user.te
+	BOARD_SEPOLICY_IGNORE+=external/sepolicy-flo/su_user.te
 endif
 
 # Quick edge case error detection for BOARD_SEPOLICY_REPLACE.

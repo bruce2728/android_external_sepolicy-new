@@ -72,7 +72,9 @@ allow $1 $2:{ file lnk_file } r_file_perms;
 
 #####################################
 # unconfined_domain(domain)
-# Allow the specified domain to do anything.
+# Allow the specified domain to perform more privileged operations
+# than would be typically allowed. Please see the comments at the
+# top of unconfined.te.
 #
 define(`unconfined_domain', `
 typeattribute $1 mlstrustedsubject;
@@ -87,7 +89,7 @@ define(`tmpfs_domain', `
 type $1_tmpfs, file_type;
 type_transition $1 tmpfs:file $1_tmpfs;
 # Map with PROT_EXEC.
-allow $1 $1_tmpfs:file { read execute execmod };
+allow $1 $1_tmpfs:file { read write execute execmod };
 ')
 
 #####################################
@@ -239,7 +241,7 @@ allow $1 kernel:security setbool;
 define(`security_access_policy', `
 allow $1 security_file:dir r_dir_perms;
 allow $1 security_file:file r_file_perms;
-allow $1 security_file:lnk_file read;
+allow $1 security_file:lnk_file r_file_perms;
 allow $1 selinuxfs:dir r_dir_perms;
 allow $1 selinuxfs:file r_file_perms;
 allow $1 rootfs:dir r_dir_perms;
@@ -259,6 +261,7 @@ security_access_policy($1)
 unix_socket_connect($1, property, init)
 allow $1 security_file:dir create_dir_perms;
 allow $1 security_file:file create_file_perms;
+allow $1 security_file:lnk_file { create rename unlink };
 allow $1 security_prop:property_service set;
 ')
 
@@ -271,6 +274,7 @@ define(`mmac_manage_policy', `
 unix_socket_connect($1, property, init)
 allow $1 security_file:dir create_dir_perms;
 allow $1 security_file:file create_file_perms;
+allow $1 security_file:lnk_file { create rename unlink };
 allow $1 security_prop:property_service set;
 ')
 
@@ -301,7 +305,21 @@ allow $1 kernel:system syslog_read;
 define(`write_klog', `
 type_transition $1 device:chr_file klog_device "__kmsg__";
 allow $1 klog_device:chr_file { create open write unlink };
-allow $1 device:dir { add_name remove_name };
+allow $1 device:dir { write add_name remove_name };
+')
+
+#####################################
+# create_pty(domain)
+# Allow domain to create and use a pty, isolated from any other domain ptys.
+define(`create_pty', `
+# Each domain gets a unique devpts type.
+type $1_devpts, fs_type;
+# Label the pty with the unique type when created.
+type_transition $1 devpts:chr_file $1_devpts;
+# Allow use of the pty after creation.
+allow $1 $1_devpts:chr_file { open getattr read write ioctl };
+# Note: devpts:dir search and ptmx_device:chr_file rw_file_perms
+# allowed to everyone via domain.te.
 ')
 
 #####################################

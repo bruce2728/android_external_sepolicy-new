@@ -3,7 +3,7 @@
 /			u:object_r:rootfs:s0
 
 # Data files
-/adb_keys		u:object_r:rootfs:s0
+/adb_keys		u:object_r:adb_keys_file:s0
 /default.prop		u:object_r:rootfs:s0
 /fstab\..*		u:object_r:rootfs:s0
 /init\..*		u:object_r:rootfs:s0
@@ -39,16 +39,17 @@
 /dev/block(/.*)?	u:object_r:block_device:s0
 /dev/block/loop[0-9]*	u:object_r:loop_device:s0
 /dev/block/ram[0-9]*	u:object_r:ram_device:s0
-/dev/block/mtdblock5	u:object_r:radio_device:s0
 /dev/bus/usb(.*)?       u:object_r:usb_device:s0
 /dev/cam		u:object_r:camera_device:s0
 /dev/console		u:object_r:console_device:s0
 /dev/cpuctl(/.*)?	u:object_r:cpuctl_device:s0
 /dev/device-mapper	u:object_r:dm_device:s0
 /dev/eac		u:object_r:audio_device:s0
+/dev/fscklogs(/.*)?	u:object_r:fscklogs:s0
 /dev/full		u:object_r:full_device:s0
 /dev/fuse		u:object_r:fuse_device:s0
 /dev/graphics(/.*)?	u:object_r:graphics_device:s0
+/dev/hw_random		u:object_r:hw_random_device:s0
 /dev/input(/.*)		u:object_r:input_device:s0
 /dev/iio:device[0-9]+   u:object_r:iio_device:s0
 /dev/ion		u:object_r:ion_device:s0
@@ -59,8 +60,6 @@
 /dev/mpu		u:object_r:gps_device:s0
 /dev/mpuirq		u:object_r:gps_device:s0
 /dev/mtd(/.*)?		u:object_r:mtd_device:s0
-/dev/mtd/mtd5		u:object_r:radio_device:s0
-/dev/mtd/mtd5ro		u:object_r:radio_device:s0
 /dev/mtp_usb		u:object_r:mtp_device:s0
 /dev/pn544		u:object_r:nfc_device:s0
 /dev/ppp		u:object_r:ppp_device:s0
@@ -74,19 +73,16 @@
 /dev/nvhost-.*		u:object_r:nv_device:s0
 /dev/random		u:object_r:random_device:s0
 /dev/rpmsg-omx[0-9]	u:object_r:rpmsg_device:s0
-/dev/rproc_user	u:object_r:rpmsg_device:s0
-/dev/s3c-jpg		u:object_r:camera_device:s0
-/dev/s3c-mem		u:object_r:camera_device:s0
-/dev/s3c-mfc		u:object_r:graphics_device:s0
+/dev/rproc_user		u:object_r:rpmsg_device:s0
 /dev/snd(/.*)?		u:object_r:audio_device:s0
-/dev/socket		u:object_r:socket_device:s0
+/dev/socket(/.*)?	u:object_r:socket_device:s0
 /dev/socket/adbd	u:object_r:adbd_socket:s0
 /dev/socket/bluetooth	u:object_r:bluetooth_socket:s0
-/dev/socket/dbus_bluetooth	u:object_r:bluetooth_socket:s0
-/dev/socket/dbus	u:object_r:dbus_socket:s0
 /dev/socket/dnsproxyd	u:object_r:dnsproxyd_socket:s0
+/dev/socket/gps		u:object_r:gps_socket:s0
 /dev/socket/installd	u:object_r:installd_socket:s0
 /dev/socket/keystore	u:object_r:keystore_socket:s0
+/dev/socket/mdns	u:object_r:mdns_socket:s0
 /dev/socket/netd	u:object_r:netd_socket:s0
 /dev/socket/property_service	u:object_r:property_socket:s0
 /dev/socket/qemud	u:object_r:qemud_socket:s0
@@ -105,7 +101,7 @@
 /dev/ttyS[0-9]*		u:object_r:serial_device:s0
 /dev/tun		u:object_r:tun_device:s0
 /dev/uhid		u:object_r:uhid_device:s0
-/dev/uinput		u:object_r:input_device:s0
+/dev/uinput		u:object_r:uhid_device:s0
 /dev/urandom		u:object_r:urandom_device:s0
 /dev/usb_accessory	u:object_r:usbaccessory_device:s0
 /dev/vcs[0-9a-z]*	u:object_r:vcs_device:s0
@@ -119,8 +115,6 @@
 # System files
 #
 /system(/.*)?		u:object_r:system_file:s0
-/system/bin/ash		u:object_r:shell_exec:s0
-/system/bin/mksh	u:object_r:shell_exec:s0
 /system/bin/sh		--	u:object_r:shell_exec:s0
 /system/bin/run-as	--	u:object_r:runas_exec:s0
 /system/bin/app_process	u:object_r:zygote_exec:s0
@@ -131,11 +125,9 @@
 /system/bin/netd	u:object_r:netd_exec:s0
 /system/bin/rild	u:object_r:rild_exec:s0
 /system/bin/mediaserver	u:object_r:mediaserver_exec:s0
-/system/bin/dbus-daemon	u:object_r:dbusd_exec:s0
 /system/bin/installd	u:object_r:installd_exec:s0
 /system/bin/keystore	u:object_r:keystore_exec:s0
 /system/bin/debuggerd	u:object_r:debuggerd_exec:s0
-/system/bin/bluetoothd	u:object_r:bluetoothd_exec:s0
 /system/bin/wpa_supplicant	u:object_r:wpa_exec:s0
 /system/bin/qemud	u:object_r:qemud_exec:s0
 /system/bin/sdcard      u:object_r:sdcardd_exec:s0
@@ -174,17 +166,18 @@
 /data/app-private/vmdl.*\.tmp	u:object_r:apk_private_tmp_file:s0
 /data/tombstones(/.*)?	u:object_r:tombstone_data_file:s0
 /data/local/tmp(/.*)?	u:object_r:shell_data_file:s0
-/data/local/tmp/selinux(/.*)?   u:object_r:tombstone_data_file:s0
 # Misc data
-/data/misc/bluetoothd(/.*)?	u:object_r:bluetoothd_data_file:s0
+/data/misc/audio(/.*)?          u:object_r:audio_data_file:s0
 /data/misc/bluetooth(/.*)?	u:object_r:bluetooth_data_file:s0
 /data/misc/bluedroid(/.*)?	u:object_r:bluetooth_data_file:s0
 /data/misc/keystore(/.*)?	u:object_r:keystore_data_file:s0
+/data/misc/media(/.*)?		u:object_r:media_data_file:s0
 /data/misc/vpn(/.*)?		u:object_r:vpn_data_file:s0
 /data/misc/systemkeys(/.*)?	u:object_r:systemkeys_data_file:s0
 /data/misc/wifi(/.*)?		u:object_r:wifi_data_file:s0
-/data/misc/camera(/.*)?	u:object_r:camera_calibration_file:s0
+/data/misc/camera(/.*)?	u:object_r:camera_data_file:s0
 /data/misc/dhcp(/.*)?           u:object_r:dhcp_data_file:s0
+/data/misc/adb(/.*)?            u:object_r:adb_keys_file:s0
 # App sandboxes
 /data/data/.*		u:object_r:app_data_file:s0
 # Wallpaper file.
@@ -208,10 +201,13 @@
 #############################
 # sysfs files
 #
-/sys/qemu_trace/process_name	--	u:object_r:sysfs_writable:s0
+/sys/qemu_trace(/.*)?	--	u:object_r:sysfs_writable:s0
 /sys/devices/platform/nfc-power/nfc_power -- u:object_r:sysfs_nfc_power_writable:s0
 /sys/class/rfkill/rfkill[0-9]*/state -- u:object_r:sysfs_bluetooth_writable:s0
 /sys/class/rfkill/rfkill[0-9]*/type -- u:object_r:sysfs_bluetooth_writable:s0
+/sys/devices/system/cpu(/.*)?    u:object_r:sysfs_devices_system_cpu:s0
+/sys/power/wake_lock -- u:object_r:sysfs_wake_lock:s0
+/sys/power/wake_unlock -- u:object_r:sysfs_wake_lock:s0
 #############################
 # asec containers
 /mnt/asec(/.*)?         u:object_r:asec_apk_file:s0

@@ -10,9 +10,6 @@ allow domain tmpfs:file { read getattr };
 # Search /storage/emulated tmpfs mount.
 allow domain tmpfs:dir r_dir_perms;
 
-# binder adjusts the nice value during IPC.
-allow domain self:capability sys_nice;
-
 # Intra-domain accesses.
 allow domain self:process ~{ execstack execheap ptrace };
 allow domain self:fd use;
@@ -23,7 +20,7 @@ allow domain self:{ unix_dgram_socket unix_stream_socket } *;
 
 # Inherit or receive open files from others.
 allow domain init:fd use;
-allow domain system:fd use;
+allow domain system_server:fd use;
 
 # Connect to adbd and use a socket transferred from it.
 allow domain adbd:unix_stream_socket connectto;
@@ -61,8 +58,8 @@ allow domain log_device:dir search;
 allow domain log_device:chr_file rw_file_perms;
 allow domain nv_device:chr_file rw_file_perms;
 allow domain alarm_device:chr_file r_file_perms;
-allow domain urandom_device:chr_file r_file_perms;
-allow domain random_device:chr_file r_file_perms;
+allow domain urandom_device:chr_file rw_file_perms;
+allow domain random_device:chr_file rw_file_perms;
 allow domain properties_device:file r_file_perms;
 
 # Filesystem accesses.
@@ -81,7 +78,7 @@ allow domain system_data_file:file { getattr read };
 allow domain system_data_file:lnk_file read;
 
 # Read apk files under /data/app.
-allow domain apk_data_file:dir search;
+allow domain apk_data_file:dir { getattr search };
 allow domain apk_data_file:file r_file_perms;
 
 # Read /data/dalvik-cache.
@@ -100,16 +97,10 @@ allow domain cgroup:file w_file_perms;
 #Allow access to ion memory allocation device
 allow domain ion_device:chr_file rw_file_perms;
 
-# For /sys/qemu_trace files in the emulator.
-bool in_qemu false;
-if (in_qemu) {
-allow domain sysfs:file rw_file_perms;
-}
-allow domain sysfs_writable:file rw_file_perms;
-
 # Read access to pseudo filesystems.
 r_dir_file(domain, proc)
 r_dir_file(domain, sysfs)
+r_dir_file(domain, sysfs_devices_system_cpu)
 r_dir_file(domain, inotify)
 r_dir_file(domain, cgroup)
 
@@ -142,3 +133,13 @@ neverallow { domain -relabeltodomain } *:dir_file_class_set relabelto;
 
 # Only init should be able to load SELinux policies
 neverallow { domain -init } kernel:security load_policy;
+
+# Only init, ueventd and system_server should be able to access HW RNG
+neverallow { domain -init -system_server -ueventd -unconfineddomain } hw_random_device:chr_file *;
+
+# Ensure that all entrypoint executables are in exec_type.
+neverallow domain { file_type -exec_type }:file entrypoint;
+
+# Ensure that nothing in userspace can access /dev/mem or /dev/kmem
+neverallow { domain -kernel -ueventd -init } kmem_device:chr_file *;
+neverallow domain kmem_device:chr_file ~{ create relabelto unlink setattr };

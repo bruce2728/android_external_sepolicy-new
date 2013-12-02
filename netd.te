@@ -8,9 +8,10 @@ allow netd self:netlink_kobject_uevent_socket *;
 allow netd self:netlink_route_socket *;
 allow netd self:netlink_nflog_socket *;
 allow netd self:rawip_socket *;
-allow netd self:udp_socket *;
-allow netd node:udp_socket node_bind;
-allow netd port:udp_socket name_bind;
+allow netd self:{ tcp_socket udp_socket } *;
+allow netd node:{ tcp_socket udp_socket } node_bind;
+allow netd port:{ tcp_socket udp_socket } name_bind;
+allow netd port:tcp_socket name_connect;
 allow netd self:unix_stream_socket *;
 allow netd shell_exec:file rx_file_perms;
 allow netd system_file:file x_file_perms;
@@ -64,11 +65,7 @@ allow netd device:sock_file write;
 # Block device access.
 neverallow netd dev_type:blk_file { read write };
 
-# Kernel memory access.
-neverallow netd kmem_device:chr_file { read write };
-
 # Setting SELinux enforcing status or booleans.
-# Conditionally allowed to system_app for SEAndroidManager.
 neverallow netd kernel:security { setenforce setbool };
 
 # Load security policy.

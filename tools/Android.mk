@@ -1,4 +1,4 @@
-ifneq ($(TARGET_SEPOLICY_NEW),true)
+ifeq ($(TARGET_SEPOLICY_NEW),true)
 LOCAL_PATH:= $(call my-dir)
 
 include $(CLEAR_VARS)
@@ -34,4 +34,25 @@ LOCAL_IS_HOST_MODULE := true
 LOCAL_MODULE_TAGS := optional
 
 include $(BUILD_PREBUILT)
+###################################
+include $(CLEAR_VARS)
+
+LOCAL_MODULE := sepolicy-check
+LOCAL_MODULE_TAGS := optional
+LOCAL_C_INCLUDES := external/libsepol/include
+LOCAL_SRC_FILES := sepolicy-check.c
+LOCAL_STATIC_LIBRARIES := libsepol
+
+include $(BUILD_HOST_EXECUTABLE)
+
+###################################
+include $(CLEAR_VARS)
+
+LOCAL_MODULE := sepolicy-analyze
+LOCAL_MODULE_TAGS := optional
+LOCAL_C_INCLUDES := external/libsepol/include
+LOCAL_SRC_FILES := sepolicy-analyze.c
+LOCAL_STATIC_LIBRARIES := libsepol
+
+include $(BUILD_HOST_EXECUTABLE)
 endif
