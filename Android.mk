@@ -12,9 +12,9 @@ MLS_SENS=1
 MLS_CATS=1024
 
 ifeq ($(TARGET_BUILD_VARIANT),user)
-	BOARD_SEPOLICY_IGNORE+=external/sepolicy-flo/su.te
+	BOARD_SEPOLICY_IGNORE+=external/sepolicy-new/su.te
 else
-	BOARD_SEPOLICY_IGNORE+=external/sepolicy-flo/su_user.te
+	BOARD_SEPOLICY_IGNORE+=external/sepolicy-new/su_user.te
 endif
 
 # Quick edge case error detection for BOARD_SEPOLICY_REPLACE.
